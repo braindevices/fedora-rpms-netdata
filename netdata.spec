@@ -15,8 +15,8 @@
 %global  _hardened_build 1
 
 Name:           netdata
-Version:        1.12.2
-Release:        3%{?dist}
+Version:        1.13.0
+Release:        1%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
@@ -257,6 +257,10 @@ fi
 %attr(4755,root,root) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Wed Mar 20 2019 Didier Fabert <didier.fabert@gmail.com> 1.13.0-1
+- Update from upstream
+- Bind to localhost
+
 * Sun Mar 03 2019 Didier Fabert <didier.fabert@gmail.com> 1.12.2-3
 - Fix upstream archive name (source0)
 
