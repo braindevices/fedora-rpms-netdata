@@ -16,7 +16,7 @@
 
 Name:           netdata
 Version:        1.13.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
@@ -25,10 +25,14 @@ Source0:        https://github.com/%{name}/%{name}/archive/v%{version}/%{name}-%
 Source1:        netdata.tmpfiles.conf
 Source2:        netdata.init
 Source3:        netdata.conf
+%if 0%{?fedora} >= 17 || 0%{?rhel} >= 7
 Patch0:         netdata-fix-shebang-1.12.1.patch
+%else
+Patch0:         netdata-fix-shebang-1.12.1.el6.patch
+%endif
 %if 0%{?fedora}
 # Remove embedded font
-Patch10:         netdata-remove-fonts-1.12.0.patch
+Patch10:        netdata-remove-fonts-1.12.0.patch
 %endif
 
 BuildRequires:  zlib-devel
@@ -257,6 +261,9 @@ fi
 %attr(4755,root,root) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Fri Mar 22 2019 Didier Fabert <didier.fabert@gmail.com> 1.13.0-2
+- Fix bash and sh path on el6
+
 * Wed Mar 20 2019 Didier Fabert <didier.fabert@gmail.com> 1.13.0-1
 - Update from upstream
 - Bind to localhost
