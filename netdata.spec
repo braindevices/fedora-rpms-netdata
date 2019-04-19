@@ -14,22 +14,23 @@
 # We use some plugins which need suid
 %global  _hardened_build 1
 
+# Build release candidate
+%global upver        1.14.0
+#global rcver        rc0
+
 Name:           netdata
-Version:        1.13.0
-Release:        2%{?dist}
+Version:        %{upver}%{?rcver:~%{rcver}}
+Release:        1%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
 URL:            https://github.com/%{name}/%{name}/
-Source0:        https://github.com/%{name}/%{name}/archive/v%{version}/%{name}-%{version}.tar.gz
+Source0:        https://github.com/%{name}/%{name}/archive/v%{upver}%{?rcver:-%{rcver}}/%{name}-%{upver}%{?rcver:-%{rcver}}.tar.gz
 Source1:        netdata.tmpfiles.conf
 Source2:        netdata.init
 Source3:        netdata.conf
-%if 0%{?fedora} >= 17 || 0%{?rhel} >= 7
-Patch0:         netdata-fix-shebang-1.12.1.patch
-%else
-Patch0:         netdata-fix-shebang-1.12.1.el6.patch
-%endif
+Patch0:         netdata-fix-shebang-1.14.0.patch
+Patch1:         netdata-fix-shebang-1.14.0.el6.patch
 %if 0%{?fedora}
 # Remove embedded font
 Patch10:        netdata-remove-fonts-1.12.0.patch
@@ -93,8 +94,12 @@ License:        GPLv3
 freeipmi plugin for netdata
 
 %prep
-%setup -qn %{name}-%{version}
+%setup -qn %{name}-%{upver}%{?rcver:-%{rcver}}
+%if 0%{?fedora} >= 17 || 0%{?rhel} >= 7
 %patch0 -p1
+%else
+%patch1 -p1
+%endif
 %if 0%{?fedora}
 # Remove embedded font(added in requires)
 %patch10 -p1
@@ -261,6 +266,15 @@ fi
 %attr(4755,root,root) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Fri Apr 19 2019 Didier Fabert <didier.fabert@gmail.com> 1.14.0-1
+- Update from upstream
+
+* Fri Apr 05 2019 Didier Fabert <didier.fabert@gmail.com> 1.14.0~rc0-2
+- Remove condition for patch (SRPM must embedded all)
+
+* Thu Apr 04 2019 Didier Fabert <didier.fabert@gmail.com> 1.14.0~rc0-1
+- Update from upstream
+
 * Fri Mar 22 2019 Didier Fabert <didier.fabert@gmail.com> 1.13.0-2
 - Fix bash and sh path on el6
 
