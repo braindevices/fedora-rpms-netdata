@@ -15,7 +15,7 @@
 %global  _hardened_build 1
 
 # Build release candidate
-%global upver        1.14.0
+%global upver        1.15.0
 #global rcver        rc0
 
 Name:           netdata
@@ -29,8 +29,8 @@ Source0:        https://github.com/%{name}/%{name}/archive/v%{upver}%{?rcver:-%{
 Source1:        netdata.tmpfiles.conf
 Source2:        netdata.init
 Source3:        netdata.conf
-Patch0:         netdata-fix-shebang-1.14.0.patch
-Patch1:         netdata-fix-shebang-1.14.0.el6.patch
+Patch0:         netdata-fix-shebang-1.15.0.patch
+Patch1:         netdata-fix-shebang-1.15.0.el6.patch
 %if 0%{?fedora}
 # Remove embedded font
 Patch10:        netdata-remove-fonts-1.12.0.patch
@@ -266,6 +266,9 @@ fi
 %attr(4755,root,root) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Tue May 21 2019 Didier Fabert <didier.fabert@gmail.com> 1.15.0-1
+- Update from upstream
+
 * Fri Apr 19 2019 Didier Fabert <didier.fabert@gmail.com> 1.14.0-1
 - Update from upstream
 
