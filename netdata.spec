@@ -20,7 +20,7 @@
 
 Name:           netdata
 Version:        %{upver}%{?rcver:~%{rcver}}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
@@ -266,6 +266,9 @@ fi
 %attr(4755,root,root) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Thu Jul 25 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.16.0-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
 * Mon Jul 08 2019 Didier Fabert <didier.fabert@gmail.com> 1.16.0-1
 - Update from upstream
 
