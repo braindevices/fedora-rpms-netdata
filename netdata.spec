@@ -15,12 +15,12 @@
 %global  _hardened_build 1
 
 # Build release candidate
-%global upver        1.16.0
+%global upver        1.17.0
 #global rcver        rc0
 
 Name:           netdata
 Version:        %{upver}%{?rcver:~%{rcver}}
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
@@ -29,8 +29,8 @@ Source0:        https://github.com/%{name}/%{name}/archive/v%{upver}%{?rcver:-%{
 Source1:        netdata.tmpfiles.conf
 Source2:        netdata.init
 Source3:        netdata.conf
-Patch0:         netdata-fix-shebang-1.16.0.patch
-Patch1:         netdata-fix-shebang-1.16.0.el6.patch
+Patch0:         netdata-fix-shebang-1.17.0.patch
+Patch1:         netdata-fix-shebang-1.17.0.el6.patch
 %if 0%{?fedora}
 # Remove embedded font
 Patch10:        netdata-remove-fonts-1.12.0.patch
@@ -266,6 +266,9 @@ fi
 %attr(4755,root,root) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Sat Sep 07 2019 Didier Fabert <didier.fabert@gmail.com> 1.17.0-1
+- Update from upstream
+
 * Thu Jul 25 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.16.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
