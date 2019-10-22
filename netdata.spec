@@ -15,7 +15,7 @@
 %global  _hardened_build 1
 
 # Build release candidate
-%global upver        1.18.0
+%global upver        1.18.1
 #global rcver        rc0
 
 Name:           netdata
@@ -266,6 +266,9 @@ fi
 %attr(4755,root,root) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Sun Oct 20 2019 Didier Fabert <didier.fabert@gmail.com> 1.18.1-1
+- Update from upstream
+
 * Thu Oct 17 2019 Didier Fabert <didier.fabert@gmail.com> 1.18.0-1
 - Update from upstream
 
