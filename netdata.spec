@@ -4,6 +4,13 @@
 %bcond_with systemd
 %endif
 
+# Because libuv-devel and Judy-devel are not available in el8 yet
+%if 0%{?rhel} && 0%{?rhel} == 8
+%bcond_with dbengine
+%else
+%bcond_without dbengine
+%endif
+
 %if 0%{?rhel} && 0%{?rhel} <= 7
 # This is temporary and should eventually be resolved. This bypasses
 # the default rhel __os_install_post which throws a python compile
@@ -15,12 +22,12 @@
 %global  _hardened_build 1
 
 # Build release candidate
-%global upver        1.18.1
+%global upver        1.20.0
 #global rcver        rc0
 
 Name:           netdata
 Version:        %{upver}%{?rcver:~%{rcver}}
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
@@ -29,11 +36,11 @@ Source0:        https://github.com/%{name}/%{name}/archive/v%{upver}%{?rcver:-%{
 Source1:        netdata.tmpfiles.conf
 Source2:        netdata.init
 Source3:        netdata.conf
-Patch0:         netdata-fix-shebang-1.18.0.patch
-Patch1:         netdata-fix-shebang-1.18.0.el6.patch
+Patch0:         netdata-fix-shebang-1.20.0.patch
+Patch1:         netdata-fix-shebang-1.20.0.el6.patch
 %if 0%{?fedora}
 # Remove embedded font
-Patch10:        netdata-remove-fonts-1.12.0.patch
+Patch10:        netdata-remove-fonts-1.19.0.patch
 %endif
 
 BuildRequires:  zlib-devel
@@ -46,10 +53,27 @@ BuildRequires:  freeipmi-devel
 BuildRequires:  httpd
 BuildRequires:  cppcheck
 BuildRequires:  gcc
-Requires:       nodejs
-%if 0%{?fedora}
-Requires:       glyphicons-halflings-fonts
+%if %{with dbengine}
+BuildRequires:  libuv-devel
+BuildRequires:  Judy-devel
 %endif
+BuildRequires:  lz4-devel
+BuildRequires:  openssl-devel
+BuildRequires:  libmnl-devel
+BuildRequires:  make
+BuildRequires:  libcurl-devel
+BuildRequires:  cups-devel
+# Only Fedora
+%if 0%{?fedora}
+BuildRequires:  python3
+BuildRequires:  autoconf-archive
+BuildRequires:  autogen
+BuildRequires:  findutils
+%else
+# Only CentOS
+BuildRequires:  python2
+%endif
+
 %if %{with systemd}
 BuildRequires:  systemd
 %{?systemd_requires}
@@ -58,6 +82,14 @@ Requires:       initscripts
 Requires:       /sbin/service
 Requires:       /sbin/chkconfig
 %endif
+
+Requires:       nodejs
+Requires:       curl
+Requires:       nc
+%if 0%{?fedora}
+Requires:       glyphicons-halflings-fonts
+%endif
+
 Requires:       %{name}-data = %{version}-%{release}
 Requires:       %{name}-conf = %{version}-%{release}
 
@@ -131,6 +163,8 @@ mkdir -p %{buildroot}%{_initrddir}
 install -p -Dp -m 0755 %{SOURCE2} %{buildroot}%{_initrddir}/%{name}
 %endif
 mkdir -p %{buildroot}%{_localstatedir}/lib/%{name}
+mkdir -p %{buildroot}%{_localstatedir}/log/%{name}
+mkdir -p %{buildroot}%{_localstatedir}/cache/%{name}
 
 mkdir -p %{buildroot}%{_sysconfdir}/logrotate.d
 install -p -m 0644 %{SOURCE3} %{buildroot}%{_sysconfdir}/%{name}/
@@ -223,6 +257,8 @@ fi
 %doc README.md CHANGELOG.md CODE_OF_CONDUCT.md CONTRIBUTORS.md HISTORICAL_CHANGELOG.md
 %license LICENSE REDISTRIBUTED.md
 %{_sbindir}/%{name}
+%{_sbindir}/%{name}-claim.sh
+%{_sbindir}/%{name}cli
 %{_libexecdir}/%{name}
 %if %{with systemd}
 %{_unitdir}/%{name}.service
@@ -266,6 +302,9 @@ fi
 %attr(4755,root,root) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Sun Mar 01 2020 Didier Fabert <didier.fabert@gmail.com> 1.20.0-1
+- Update from upstream
+
 * Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.18.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
