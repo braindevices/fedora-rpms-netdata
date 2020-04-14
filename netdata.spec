@@ -22,7 +22,7 @@
 %global  _hardened_build 1
 
 # Build release candidate
-%global upver        1.21.0
+%global upver        1.21.1
 #global rcver        rc0
 
 Name:           netdata
@@ -302,6 +302,9 @@ fi
 %attr(4755,root,root) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Tue Apr 14 2020 Didier Fabert <didier.fabert@gmail.com> 1.21.1-1
+- Update from upstream
+
 * Tue Apr 07 2020 Didier Fabert <didier.fabert@gmail.com> 1.21.0-1
 - Update from upstream
 
