@@ -27,7 +27,7 @@
 
 Name:           netdata
 Version:        %{upver}%{?rcver:~%{rcver}}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
@@ -266,7 +266,12 @@ fi
 %else
 %attr(0755,root,root) %{_initrddir}/%{name}
 %endif
-%attr(4755,root,root) %{_libexecdir}/%{name}/plugins.d/apps.plugin
+%caps(cap_dac_read_search,cap_sys_ptrace=ep) %attr(0750,root,netdata) %{_libexecdir}/%{name}/plugins.d/apps.plugin
+%caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/cgroup-network
+%attr(0750,root,netdata) %{_libexecdir}/%{name}/plugins.d/cgroup-network-helper.sh
+%caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/perf.plugin
+%caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/slabinfo.plugin
+%attr(0750,root,netdata) %{_libexecdir}/%{name}/plugins.d/cups.plugin
 %exclude %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 %attr(0755, netdata, netdata) %{_localstatedir}/lib/%{name}
 %attr(0755, netdata, netdata) %dir %{_localstatedir}/cache/%{name}
@@ -299,9 +304,12 @@ fi
 %files freeipmi
 %doc README.md
 %license LICENSE REDISTRIBUTED.md
-%attr(4755,root,root) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
+%caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Sat Apr 18 2020 Juan Orti Alcaine <jortialc@redhat.com> 1.21.1-2
+- Sync /usr/libexec/netdata/plugins.d/ binaries permissions with upstream
+
 * Tue Apr 14 2020 Didier Fabert <didier.fabert@gmail.com> 1.21.1-1
 - Update from upstream
 
