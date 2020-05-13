@@ -63,6 +63,7 @@ BuildRequires:  libmnl-devel
 BuildRequires:  make
 BuildRequires:  libcurl-devel
 BuildRequires:  cups-devel
+BuildRequires:  libnetfilter_acct-devel
 # Only Fedora
 %if 0%{?fedora}
 BuildRequires:  python3
