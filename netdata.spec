@@ -22,12 +22,12 @@
 %global  _hardened_build 1
 
 # Build release candidate
-%global upver        1.21.1
+%global upver        1.22.1
 #global rcver        rc0
 
 Name:           netdata
 Version:        %{upver}%{?rcver:~%{rcver}}
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
@@ -36,8 +36,8 @@ Source0:        https://github.com/%{name}/%{name}/archive/v%{upver}%{?rcver:-%{
 Source1:        netdata.tmpfiles.conf
 Source2:        netdata.init
 Source3:        netdata.conf
-Patch0:         netdata-fix-shebang-1.21.0.patch
-Patch1:         netdata-fix-shebang-1.21.0.el6.patch
+Patch0:         netdata-fix-shebang-1.22.1.patch
+Patch1:         netdata-fix-shebang-1.22.1.el6.patch
 %if 0%{?fedora}
 # Remove embedded font
 Patch10:        netdata-remove-fonts-1.19.0.patch
@@ -308,6 +308,9 @@ fi
 %caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Wed May 13 2020 Didier Fabert <didier.fabert@gmail.com> 1.22.1-1
+- Update from upstream
+
 * Sat Apr 18 2020 Juan Orti Alcaine <jortialc@redhat.com> 1.21.1-2
 - Sync /usr/libexec/netdata/plugins.d/ binaries permissions with upstream
 
