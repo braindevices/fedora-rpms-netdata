@@ -4,6 +4,11 @@
 %bcond_with systemd
 %endif
 
+# libuv-devel and Judy-devel are not available on el8 s390x
+%if 0%{?rhel} && 0%{?rhel} == 8
+ExcludeArch: s390x
+%endif
+
 # Because libnetfilter_acct-devel is not available in el7
 %if 0%{?rhel} && 0%{?rhel} >= 7
 %bcond_with netfilteracct
@@ -34,7 +39,7 @@
 
 Name:           netdata
 Version:        %{upver}%{?rcver:~%{rcver}}
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
@@ -325,6 +330,9 @@ fi
 %caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Sun May 17 2020 Didier Fabert <didier.fabert@gmail.com> 1.22.1-3
+- Exclude arch s390x on el8
+
 * Fri May 15 2020 Didier Fabert <didier.fabert@gmail.com> 1.22.1-2
 - Conditionnaly build netfilteracct and cups plugins (disabed in epel7)
 
