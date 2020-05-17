@@ -4,11 +4,18 @@
 %bcond_with systemd
 %endif
 
-# Because libuv-devel and Judy-devel are not available in el8 yet
-%if 0%{?rhel} && 0%{?rhel} == 8
-%bcond_with dbengine
+# Because libnetfilter_acct-devel is not available in el7
+%if 0%{?rhel} && 0%{?rhel} >= 7
+%bcond_with netfilteracct
 %else
-%bcond_without dbengine
+%bcond_without netfilteracct
+%endif
+
+# Because cups is too old in el7
+%if 0%{?rhel} && 0%{?rhel} <= 7
+%bcond_with cups
+%else
+%bcond_without cups
 %endif
 
 %if 0%{?rhel} && 0%{?rhel} <= 7
@@ -27,7 +34,7 @@
 
 Name:           netdata
 Version:        %{upver}%{?rcver:~%{rcver}}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
@@ -53,17 +60,19 @@ BuildRequires:  freeipmi-devel
 BuildRequires:  httpd
 BuildRequires:  cppcheck
 BuildRequires:  gcc
-%if %{with dbengine}
 BuildRequires:  libuv-devel
 BuildRequires:  Judy-devel
-%endif
 BuildRequires:  lz4-devel
 BuildRequires:  openssl-devel
 BuildRequires:  libmnl-devel
 BuildRequires:  make
 BuildRequires:  libcurl-devel
+%if %{with cups}
 BuildRequires:  cups-devel
+%endif
+%if %{with netfilteracct}
 BuildRequires:  libnetfilter_acct-devel
+%endif
 # Only Fedora
 %if 0%{?fedora}
 BuildRequires:  python3
@@ -146,6 +155,12 @@ autoreconf -ivf
     --sysconfdir=%{_sysconfdir} \
     --localstatedir=%{_localstatedir} \
     --enable-plugin-freeipmi \
+%if %{with netfilteracct}
+    --enable-plugin-nfacct \
+%endif
+%if %{with cups}
+    --enable-plugin-cups \
+%endif
     --with-zlib --with-math --with-user=netdata
 %make_build
 
@@ -272,7 +287,9 @@ fi
 %attr(0750,root,netdata) %{_libexecdir}/%{name}/plugins.d/cgroup-network-helper.sh
 %caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/perf.plugin
 %caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/slabinfo.plugin
+%if %{with cups}
 %attr(0750,root,netdata) %{_libexecdir}/%{name}/plugins.d/cups.plugin
+%endif
 %exclude %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 %attr(0755, netdata, netdata) %{_localstatedir}/lib/%{name}
 %attr(0755, netdata, netdata) %dir %{_localstatedir}/cache/%{name}
@@ -308,6 +325,9 @@ fi
 %caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Fri May 15 2020 Didier Fabert <didier.fabert@gmail.com> 1.22.1-2
+- Conditionnaly build netfilteracct and cups plugins (disabed in epel7)
+
 * Wed May 13 2020 Didier Fabert <didier.fabert@gmail.com> 1.22.1-1
 - Update from upstream
 
