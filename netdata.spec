@@ -34,7 +34,7 @@ ExcludeArch: s390x
 %global  _hardened_build 1
 
 # Build release candidate
-%global upver        1.23.1
+%global upver        1.23.2
 #global rcver        rc0
 
 Name:           netdata
@@ -330,6 +330,9 @@ fi
 %caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Fri Jul 17 2020 Didier Fabert <didier.fabert@gmail.com> 1.23.2-1
+- Update from upstream
+
 * Thu Jul 02 2020 Didier Fabert <didier.fabert@gmail.com> 1.23.1-1
 - Update from upstream
 
