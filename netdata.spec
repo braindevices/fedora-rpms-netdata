@@ -1,8 +1,4 @@
-%if 0%{?fedora} >= 17 || 0%{?rhel} >= 7
-%bcond_without systemd
-%else
 %bcond_with systemd
-%endif
 
 # libuv-devel and Judy-devel are not available on el8 s390x
 %if 0%{?rhel} && 0%{?rhel} == 8
@@ -34,12 +30,12 @@ ExcludeArch: s390x
 %global  _hardened_build 1
 
 # Build release candidate
-%global upver        1.23.2
+%global upver        1.25.0
 #global rcver        rc0
 
 Name:           netdata
 Version:        %{upver}%{?rcver:~%{rcver}}
-Release:        2%{?dist}
+Release:        1%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
@@ -49,7 +45,6 @@ Source1:        netdata.tmpfiles.conf
 Source2:        netdata.init
 Source3:        netdata.conf
 Patch0:         netdata-fix-shebang-1.23.1.patch
-Patch1:         netdata-fix-shebang-1.23.1.el6.patch
 %if 0%{?fedora}
 # Remove embedded font
 Patch10:        netdata-remove-fonts-1.19.0.patch
@@ -72,6 +67,9 @@ BuildRequires:  openssl-devel
 BuildRequires:  libmnl-devel
 BuildRequires:  make
 BuildRequires:  libcurl-devel
+BuildRequires:  snappy-devel
+BuildRequires:  protobuf-devel
+BuildRequires:  protobuf-c-devel
 %if %{with cups}
 BuildRequires:  cups-devel
 %endif
@@ -101,6 +99,9 @@ Requires:       /sbin/chkconfig
 Requires:       nodejs
 Requires:       curl
 Requires:       nc
+Requires:       snappy
+Requires:       protobuf-c
+Requires:       protobuf
 %if 0%{?fedora}
 Requires:       glyphicons-halflings-fonts
 %endif
@@ -142,11 +143,7 @@ freeipmi plugin for netdata
 
 %prep
 %setup -qn %{name}-%{upver}%{?rcver:-%{rcver}}
-%if 0%{?fedora} >= 17 || 0%{?rhel} >= 7
 %patch0 -p1
-%else
-%patch1 -p1
-%endif
 %if 0%{?fedora}
 # Remove embedded font(added in requires)
 %patch10 -p1
@@ -166,7 +163,10 @@ autoreconf -ivf
 %if %{with cups}
     --enable-plugin-cups \
 %endif
-    --with-zlib --with-math --with-user=netdata
+    --with-zlib \
+    --with-math \
+    --with-user=netdata
+    
 %make_build
 
 %install
@@ -198,81 +198,26 @@ mv %{buildroot}%{_sysconfdir}/%{name}/edit-config %{buildroot}%{_libexecdir}/%{n
 sed -i -e 's/\r//' %{buildroot}%{_datadir}/%{name}/web/lib/tableExport-1.6.0.min.js
 # Delete useless hidden dir
 rm -rf %{buildroot}%{_datadir}/%{name}/web/.well-known
+# Delete useless file (ubuntu)
+rm -f %{buildroot}%{_sysconfdir}/%{name}/conf.d/ebpf_kernel_reject_list.txt
 
 %check
-# tests cannot be run on el6
-%if 0%{?fedora} >= 17 || 0%{?rhel} >= 7
 ./cppcheck.sh
-%endif
 
 %pre
 getent group netdata > /dev/null || groupadd -r netdata
 getent passwd netdata > /dev/null || useradd -r -g netdata -c "NetData User" -s /sbin/nologin -d /var/log/%{name} netdata
 
 %post
-%if 0%{?systemd_post:1}
 %systemd_post %{name}.service
-%else
-if [ $1 = 1 ]; then
-    # Initial installation
-%if %{with systemd}
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-%else
-    /sbin/chkconfig --add %{name}
-%endif
-fi
-%endif
 echo "The current config file can be downloaded with the following command"
 echo "curl -o /etc/netdata/netdata.conf http://localhost:19999/netdata.conf"
 
 %preun
-%if 0%{?systemd_preun:1}
 %systemd_preun %{name}.service
-%else
-if [ "$1" = 0 ] ; then
-    # Package removal, not upgrade
-%if %{with systemd}
-    /bin/systemctl --no-reload disable %{name}.service >/dev/null 2>&1 || :
-    /bin/systemctl stop %{name}.service >/dev/null 2>&1 || :
-%else
-    /sbin/service %{name} stop > /dev/null 2>&1
-    /sbin/chkconfig --del %{name}
-%endif
-fi
-exit 0
-%endif
 
 %postun
-%if 0%{?systemd_postun_with_restart:1}
 %systemd_postun_with_restart %{name}.service
-%else
-%if %{with systemd}
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ]; then
-# Package upgrade, not uninstall
-    /bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
-fi
-%else
-if [ "$1" -ge 1 ]; then
-    /sbin/service %{name} restart > /dev/null 2>&1
-fi
-exit 0
-%endif
-%endif
-
-%triggerun -- netdata
-%if %{with systemd}
-if [ -f /etc/rc.d/init.d/%{name} ]; then
-# Save the current service runlevel info
-# User must manually run systemd-sysv-convert --apply netdata
-# to migrate them to systemd targets
-/usr/bin/systemd-sysv-convert --save %{name} >/dev/null 2>&1 ||:
-
-# Run these because the SysV package being removed won't do them
-/sbin/chkconfig --del %{name} >/dev/null 2>&1 || :
-/bin/systemctl try-restart %{name}.service >/dev/null 2>&1 || :
-fi
-%endif
 
 %files
 %doc README.md CHANGELOG.md CODE_OF_CONDUCT.md CONTRIBUTORS.md HISTORICAL_CHANGELOG.md
@@ -330,6 +275,13 @@ fi
 %caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Tue Sep 22 2020 Didier Fabert <didier.fabert@gmail.com> 1.25.0-1
+- Update from upstream
+- Drop el6 support
+
+* Thu Aug 13 2020 Didier Fabert <didier.fabert@gmail.com> 1.24.0-1
+- Update from upstream
+
 * Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.23.2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
