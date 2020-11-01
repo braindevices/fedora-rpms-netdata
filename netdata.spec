@@ -30,7 +30,7 @@ ExcludeArch: s390x
 %global  _hardened_build 1
 
 # Build release candidate
-%global upver        1.25.0
+%global upver        1.26.0
 #global rcver        rc0
 
 Name:           netdata
@@ -275,6 +275,9 @@ echo "curl -o /etc/netdata/netdata.conf http://localhost:19999/netdata.conf"
 %caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Sun Nov 01 2020 Didier Fabert <didier.fabert@gmail.com> 1.26.0-1
+- Update from upstream
+
 * Tue Sep 22 2020 Didier Fabert <didier.fabert@gmail.com> 1.25.0-1
 - Update from upstream
 - Drop el6 support
