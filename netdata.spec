@@ -1,5 +1,3 @@
-%bcond_with systemd
-
 # libuv-devel and Judy-devel are not available on el8 s390x
 %if 0%{?rhel} && 0%{?rhel} == 8
 ExcludeArch: s390x
@@ -35,7 +33,7 @@ ExcludeArch: s390x
 
 Name:           netdata
 Version:        %{upver}%{?rcver:~%{rcver}}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
@@ -60,6 +58,7 @@ BuildRequires:  freeipmi-devel
 BuildRequires:  httpd
 BuildRequires:  cppcheck
 BuildRequires:  gcc
+BuildRequires:  gcc-c++
 BuildRequires:  libuv-devel
 BuildRequires:  Judy-devel
 BuildRequires:  lz4-devel
@@ -70,6 +69,14 @@ BuildRequires:  libcurl-devel
 BuildRequires:  snappy-devel
 BuildRequires:  protobuf-devel
 BuildRequires:  protobuf-c-devel
+
+# Cloud client
+# BuildRequires:  mosquitto-devel
+# BuildRequires:  libwebsockets-devel
+# BuildRequires:  json-c-devel
+# BuildRequires:  libpfm-devel
+# BuildRequires:  libcap-devel
+
 %if %{with cups}
 BuildRequires:  cups-devel
 %endif
@@ -87,14 +94,7 @@ BuildRequires:  findutils
 BuildRequires:  python2
 %endif
 
-%if %{with systemd}
 BuildRequires:  systemd
-%{?systemd_requires}
-%else
-Requires:       initscripts
-Requires:       /sbin/service
-Requires:       /sbin/chkconfig
-%endif
 
 Requires:       nodejs
 Requires:       curl
@@ -153,9 +153,6 @@ rm -rf web/fonts
 %build
 autoreconf -ivf
 %configure \
-    --prefix=%{_prefix} \
-    --sysconfdir=%{_sysconfdir} \
-    --localstatedir=%{_localstatedir} \
     --enable-plugin-freeipmi \
 %if %{with netfilteracct}
     --enable-plugin-nfacct \
@@ -173,16 +170,13 @@ autoreconf -ivf
 %make_install
 find %{buildroot} -name '.keep' -delete
 # Unit file
-%if %{with systemd}
 mkdir -p %{buildroot}%{_unitdir}
 mkdir -p %{buildroot}%{_tmpfilesdir}
+mkdir -p %{buildroot}%{_sysconfdir}/logrotate.d
 install -Dp -m 0644 system/netdata.service %{buildroot}%{_unitdir}/%{name}.service
 install -p -m 0644 %{SOURCE1} %{buildroot}%{_tmpfilesdir}/%{name}.conf
-%else
-# Init script
-mkdir -p %{buildroot}%{_initrddir}
-install -p -Dp -m 0755 %{SOURCE2} %{buildroot}%{_initrddir}/%{name}
-%endif
+install -Dp -m 0644 system/netdata.logrotate %{buildroot}%{_sysconfdir}/logrotate.d/netdata
+
 mkdir -p %{buildroot}%{_localstatedir}/lib/%{name}
 mkdir -p %{buildroot}%{_localstatedir}/log/%{name}
 mkdir -p %{buildroot}%{_localstatedir}/cache/%{name}
@@ -226,12 +220,8 @@ echo "curl -o /etc/netdata/netdata.conf http://localhost:19999/netdata.conf"
 %{_sbindir}/%{name}-claim.sh
 %{_sbindir}/%{name}cli
 %{_libexecdir}/%{name}
-%if %{with systemd}
 %{_unitdir}/%{name}.service
 %{_tmpfilesdir}/%{name}.conf
-%else
-%attr(0755,root,root) %{_initrddir}/%{name}
-%endif
 %caps(cap_dac_read_search,cap_sys_ptrace=ep) %attr(0750,root,netdata) %{_libexecdir}/%{name}/plugins.d/apps.plugin
 %caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/cgroup-network
 %attr(0750,root,netdata) %{_libexecdir}/%{name}/plugins.d/cgroup-network-helper.sh
@@ -261,6 +251,7 @@ echo "curl -o /etc/netdata/netdata.conf http://localhost:19999/netdata.conf"
 %config(noreplace) %{_sysconfdir}/%{name}/conf.d/health.d/*.conf
 %config(noreplace) %{_sysconfdir}/%{name}/conf.d/python.d/*.conf
 %config(noreplace) %{_sysconfdir}/%{name}/conf.d/statsd.d/*.conf
+%config(noreplace) %{_sysconfdir}/logrotate.d/netdata
 
 %files data
 %doc README.md
@@ -275,6 +266,11 @@ echo "curl -o /etc/netdata/netdata.conf http://localhost:19999/netdata.conf"
 %caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Mon Nov 02 2020 Didier Fabert <didier.fabert@gmail.com> 1.26.0-2
+- Fix wrong drop for el6 support
+- Fix tmpfiles (from /var/run to /run)
+- Minors changes in netdata.conf
+
 * Sun Nov 01 2020 Didier Fabert <didier.fabert@gmail.com> 1.26.0-1
 - Update from upstream
 
