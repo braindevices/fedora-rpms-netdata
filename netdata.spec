@@ -33,7 +33,7 @@ ExcludeArch: s390x
 
 Name:           netdata
 Version:        %{upver}%{?rcver:~%{rcver}}
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Real-time performance monitoring
 # For a breakdown of the licensing, see LICENSE-REDISTRIBUTED.md
 License:        GPLv3 and GPLv3+ and ASL 2.0 and CC-BY and MIT and WTFPL 
@@ -258,6 +258,7 @@ echo "curl -o /etc/netdata/netdata.conf http://localhost:19999/netdata.conf"
 %license LICENSE REDISTRIBUTED.md
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/web
+%attr(0755, root, netdata) %{_datadir}/%{name}/web
 
 
 %files freeipmi
