@@ -267,6 +267,9 @@ echo "curl -o /etc/netdata/netdata.conf http://localhost:19999/netdata.conf"
 %caps(cap_setuid=ep) %attr(4750,root,netdata) %{_libexecdir}/%{name}/plugins.d/freeipmi.plugin
 
 %changelog
+* Fri Dec 11 2020  Ling Wang <LingWangNeuralEng@gmail.com> 1.26.0-3
+- fix Bug 1906930: change /usr/share/netdata/web group to netdata
+
 * Mon Nov 02 2020 Didier Fabert <didier.fabert@gmail.com> 1.26.0-2
 - Fix wrong drop for el6 support
 - Fix tmpfiles (from /var/run to /run)
