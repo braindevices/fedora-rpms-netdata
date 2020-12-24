@@ -258,7 +258,7 @@ echo "curl -o /etc/netdata/netdata.conf http://localhost:19999/netdata.conf"
 %license LICENSE REDISTRIBUTED.md
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/web
-%attr(0755, root, netdata) %{_datadir}/%{name}/web
+%attr(-, root, netdata) %{_datadir}/%{name}/web
 
 
 %files freeipmi
